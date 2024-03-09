@@ -1,4 +1,5 @@
 const express = require('express');
+const cors=require('cors')
 const mongoose = require('mongoose');
 require('dotenv').config();
 const taskRoutes=require('./routes/task')
@@ -7,10 +8,11 @@ Mongodb()
 // const protectedRoutes = require('./routes/protected');
 // const passport = require('./services/passportConfig');
 const app = express();
+app.use(cors())
 app.use(express.json());
 
 app.get('/', (req,res) => {
-  res.send('hello world i am listening')
+  res.send('hello world i am listening ')
 })
 
 app.use('/api',taskRoutes)
