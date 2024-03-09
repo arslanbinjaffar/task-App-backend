@@ -1,8 +1,12 @@
 const express = require('express');
-const cors=require('cors')
+const cors = require('cors')
+const passport=require('passport')
+const expressSession = require('express-session');
 const mongoose = require('mongoose');
+const initializePassport = require('./services/config/passport');
+const taskRoutes = require('./routes/task')
+const authRouter = require('./routes/auth');
 require('dotenv').config();
-const taskRoutes=require('./routes/task')
 Mongodb()
 // const authRoutes = require('./routes/auth');
 // const protectedRoutes = require('./routes/protected');
@@ -10,7 +14,7 @@ Mongodb()
 const app = express();
 app.use(cors())
 app.use(express.json());
-
+initializePassport(passport)
 app.get('/', (req,res) => {
   res.send('hello world i am listening ')
 })
@@ -38,7 +42,14 @@ const setContext = (req, res, next) => {
   next();
 };
 app.use(setContext);
+
+// Set up middleware
+app.use(expressSession({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: false }));
+app.use(passport.initialize());
+app.use(passport.session());
+//routes
 app.use('/api',taskRoutes)
+app.use(authRouter);
 
 // Start server
 const PORT = process.env.PORT || 3000;
