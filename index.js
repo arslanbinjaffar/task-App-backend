@@ -11,10 +11,33 @@ const app = express();
 app.use(cors())
 app.use(express.json());
 
-app.get('/', (req,res) => {
+app.use('/', (req,res) => {
   res.send('hello world i am listening ')
 })
 
+const whitelist = [
+  '*'
+];
+
+app.use((req, res, next) => {
+  const origin = req.get('referer');
+  const isWhitelisted = whitelist.find((w) => origin && origin.includes(w));
+  if (isWhitelisted) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,Content-Type,Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', true);
+  }
+  // Pass to next layer of middleware
+  if (req.method === 'OPTIONS') res.sendStatus(200);
+  else next();
+});
+
+const setContext = (req, res, next) => {
+  if (!req.context) req.context = {};
+  next();
+};
+app.use(setContext);
 app.use('/api',taskRoutes)
 
 // Start server
@@ -28,10 +51,7 @@ app.listen(PORT, () => {
 
 function Mongodb() {
   try {
-    mongoose.connect(process.env.MongoDB, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    mongoose.connect(process.env.MongoDB);
     console.log("connected to mongodb")
   } catch (error) {
     console.log(error)
