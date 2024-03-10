@@ -11,7 +11,7 @@ const createUser = async (req, res) => {
     .catch(error => {
         console.error('User creation error:', error);
     });
-        res.status(201).json(newUser);
+        res.status(201).json({message:"user created succefully",newUser});
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
